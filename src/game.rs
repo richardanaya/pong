@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::mem;
 use web_dom::*;
 const WIDTH: f32 = 400.0;
 const HEIGHT: f32 = 600.0;
@@ -16,7 +15,6 @@ pub struct GameState {
     ball: Ball,
 }
 
-#[derive(Default)]
 struct Paddle {
     x: f32,
     y: f32,
@@ -46,116 +44,19 @@ impl Paddle {
     }
 }
 
-#[derive(Default)]
 struct Player {
     paddle: Paddle,
 }
 
-impl Player {
-    fn render(&self, ctx: DOMReference) {
-        self.paddle.render(ctx);
-    }
-    fn update(&mut self, game: &GameState) {
-        if *game.keys.get(&37).unwrap_or(&false) {
-            self.paddle.move_paddle(-4.0, 0.0);
-        } else if *game.keys.get(&39).unwrap_or(&false) {
-            self.paddle.move_paddle(4.0, 0.0);
-        } else {
-            self.paddle.move_paddle(0.0, 0.0);
-        }
-    }
-}
-
-#[derive(Default)]
 struct Computer {
     paddle: Paddle,
 }
 
-impl Computer {
-    fn render(&self, ctx: DOMReference) {
-        self.paddle.render(ctx);
-    }
-
-    fn update(&mut self, game: &GameState) {
-        let x_pos = game.ball.x;
-        let mut diff = -((self.paddle.x + (self.paddle.width / 2.0)) - x_pos);
-        if diff < 0.0 && diff < -4.0 {
-            diff = -5.0;
-        } else if diff > 0.0 && diff > 4.0 {
-            diff = 5.0;
-        }
-        self.paddle.move_paddle(diff, 0.0);
-        if self.paddle.x < 0.0 {
-            self.paddle.x = 0.0;
-        } else if self.paddle.x + self.paddle.width > 400.0 {
-            self.paddle.x = 400.0 - self.paddle.width;
-        }
-    }
-}
-
-#[derive(Default)]
 struct Ball {
     x: f32,
     y: f32,
     vx: f32,
     vy: f32,
-}
-
-impl Ball {
-    fn render(&self, ctx: DOMReference) {
-        drawing::begin_path(ctx);
-        drawing::arc(ctx, self.x, self.y, 5.0, 2.0 * std::f32::consts::PI, 0.0, 0);
-        drawing::set_fill_style(ctx, "#FF0000");
-        drawing::fill(ctx);
-    }
-
-    fn update(&mut self, game: &GameState) {
-        self.x += self.vx;
-        self.y += self.vy;
-        let top_x = self.x - 5.0;
-        let top_y = self.y - 5.0;
-        let bottom_x = self.x + 5.0;
-        let bottom_y = self.y + 5.0;
-
-        if self.x - 5.0 < 0.0 {
-            self.x = 5.0;
-            self.vx = -self.vx;
-        } else if self.x + 5.0 > 400.0 {
-            self.x = 395.0;
-            self.vx = -self.vx;
-        }
-
-        if self.y < 0.0 || self.y > 600.0 {
-            self.vx = 0.0;
-            self.vy = 3.0;
-            self.x = 200.0;
-            self.y = 300.0;
-        }
-
-        let paddle1 = &game.player.paddle;
-        let paddle2 = &game.computer.paddle;
-        if top_y > 300.0 {
-            if top_y < (paddle1.y + paddle1.height)
-                && bottom_y > paddle1.y
-                && top_x < (paddle1.x + paddle1.width)
-                && bottom_x > paddle1.x
-            {
-                self.vy = -3.0;
-                self.vx += paddle1.vx / 2.0;
-                self.y += self.vy;
-            }
-        } else {
-            if top_y < (paddle2.y + paddle2.height)
-                && bottom_y > paddle2.y
-                && top_x < (paddle2.x + paddle2.width)
-                && bottom_x > paddle2.x
-            {
-                self.vy = 3.0;
-                self.vx += paddle2.vx / 2.0;
-                self.y += self.vy;
-            }
-        }
-    }
 }
 
 impl GameState {
@@ -223,27 +124,108 @@ impl GameState {
     }
 
     fn update(&mut self) {
-        let mut player = Player::default();
-        mem::swap(&mut self.player, &mut player);
-        player.update(self);
-        mem::swap(&mut self.player, &mut player);
-        let mut computer = Computer::default();
-        mem::swap(&mut self.computer, &mut computer);
-        computer.update(self);
-        mem::swap(&mut self.computer, &mut computer);
-        let mut ball = Ball::default();
-        mem::swap(&mut self.ball, &mut ball);
-        ball.update(self);
-        mem::swap(&mut self.ball, &mut ball);
+        self.player_update();
+        self.computer_update();
+        self.ball_update();
     }
 
     fn render(&mut self) {
-        self.player.render(self.ctx);
-        self.computer.render(self.ctx);
-        self.ball.render(self.ctx);
+        self.player_render();
+        self.computer_render();
+        self.ball_render();
     }
 
     pub fn clear(&self) {
         drawing::clear_rect(self.ctx, 0.0, 0.0, WIDTH, HEIGHT);
+    }
+
+    fn player_render(&self) {
+        self.player.paddle.render(self.ctx);
+    }
+    fn player_update(&mut self) {
+        if *self.keys.get(&37).unwrap_or(&false) {
+            self.player.paddle.move_paddle(-4.0, 0.0);
+        } else if *self.keys.get(&39).unwrap_or(&false) {
+            self.player.paddle.move_paddle(4.0, 0.0);
+        } else {
+            self.player.paddle.move_paddle(0.0, 0.0);
+        }
+    }
+
+    fn computer_render(&self) {
+        self.computer.paddle.render(self.ctx);
+    }
+
+    fn computer_update(&mut self) {
+        let computer = &mut self.computer;
+        let x_pos = self.ball.x;
+        let mut diff = -((computer.paddle.x + (computer.paddle.width / 2.0)) - x_pos);
+        if diff < 0.0 && diff < -4.0 {
+            diff = -5.0;
+        } else if diff > 0.0 && diff > 4.0 {
+            diff = 5.0;
+        }
+        computer.paddle.move_paddle(diff, 0.0);
+        if computer.paddle.x < 0.0 {
+            computer.paddle.x = 0.0;
+        } else if computer.paddle.x + computer.paddle.width > 400.0 {
+            computer.paddle.x = 400.0 - computer.paddle.width;
+        }
+    }
+
+    fn ball_render(&self) {
+        drawing::begin_path(self.ctx);
+        drawing::arc(self.ctx, self.ball.x, self.ball.y, 5.0, 2.0 * std::f32::consts::PI, 0.0, 0);
+        drawing::set_fill_style(self.ctx, "#FF0000");
+        drawing::fill(self.ctx);
+    }
+
+    fn ball_update(&mut self) {
+        let ball = &mut self.ball;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        let top_x = ball.x - 5.0;
+        let top_y = ball.y - 5.0;
+        let bottom_x = ball.x + 5.0;
+        let bottom_y = ball.y + 5.0;
+
+        if ball.x - 5.0 < 0.0 {
+            ball.x = 5.0;
+            ball.vx = -ball.vx;
+        } else if ball.x + 5.0 > 400.0 {
+            ball.x = 395.0;
+            ball.vx = -ball.vx;
+        }
+
+        if ball.y < 0.0 || ball.y > 600.0 {
+            ball.vx = 0.0;
+            ball.vy = 3.0;
+            ball.x = 200.0;
+            ball.y = 300.0;
+        }
+
+        let paddle1 = &self.player.paddle;
+        let paddle2 = &self.computer.paddle;
+        if top_y > 300.0 {
+            if top_y < (paddle1.y + paddle1.height)
+                && bottom_y > paddle1.y
+                && top_x < (paddle1.x + paddle1.width)
+                && bottom_x > paddle1.x
+            {
+                ball.vy = -3.0;
+                ball.vx += paddle1.vx / 2.0;
+                ball.y += ball.vy;
+            }
+        } else {
+            if top_y < (paddle2.y + paddle2.height)
+                && bottom_y > paddle2.y
+                && top_x < (paddle2.x + paddle2.width)
+                && bottom_x > paddle2.x
+            {
+                ball.vy = 3.0;
+                ball.vx += paddle2.vx / 2.0;
+                ball.y += ball.vy;
+            }
+        }
     }
 }
