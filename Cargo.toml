@@ -1,0 +1,12 @@
+[package]
+name = "pong"
+version = "0.0.0"
+authors = ["Richard Anaya"]
+edition = "2018"
+
+[dependencies]
+ref_thread_local = "0.0"
+web-dom = "0.0.8"
+
+[lib]
+crate-type =["cdylib"]
