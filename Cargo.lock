@@ -5,7 +5,7 @@ name = "pong"
 version = "0.0.0"
 dependencies = [
  "ref_thread_local 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "web-dom 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "web-dom 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -15,9 +15,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "web-dom"
-version = "0.0.8"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
 "checksum ref_thread_local 0.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d813022b2e00774a48eaf43caaa3c20b45f040ba8cbf398e2e8911a06668dbe6"
-"checksum web-dom 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "0365f9bc457d2b0b1aeeec650a57bd087c111648e05424a051e66ab9a0556c87"
+"checksum web-dom 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "943e295f9810d419ae2d5bc02ecade8425261abf82c6b6c12317a3cebc13375d"

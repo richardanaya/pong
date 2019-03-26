@@ -26,8 +26,8 @@ struct Paddle {
 
 impl Paddle {
     fn render(&self, ctx: DOMReference) {
-        drawing::set_fill_style(ctx, "#0000FF");
-        drawing::fill_rect(ctx, self.x, self.y, self.width, self.height);
+        canvas::set_fill_style(ctx, "#0000FF");
+        canvas::fill_rect(ctx, self.x, self.y, self.width, self.height);
     }
     fn move_paddle(&mut self, x: f32, y: f32) {
         self.x += x;
@@ -111,9 +111,9 @@ impl GameState {
             self.run();
             window::request_animation_frame(self.window, self.request_animation_frame_listener);
         } else if listener == self.key_up_listener {
-            self.keys.insert(keyboardevent::get_key_code(event), false);
+            self.keys.insert(keyboardevent::get_key_code(event) as i32, false);
         } else if listener == self.key_down_listener {
-            self.keys.insert(keyboardevent::get_key_code(event), true);
+            self.keys.insert(keyboardevent::get_key_code(event) as i32, true);
         }
     }
 
@@ -136,7 +136,7 @@ impl GameState {
     }
 
     pub fn clear(&self) {
-        drawing::clear_rect(self.ctx, 0.0, 0.0, WIDTH, HEIGHT);
+        canvas::clear_rect(self.ctx, 0.0, 0.0, WIDTH, HEIGHT);
     }
 
     fn player_render(&self) {
@@ -174,10 +174,10 @@ impl GameState {
     }
 
     fn ball_render(&self) {
-        drawing::begin_path(self.ctx);
-        drawing::arc(self.ctx, self.ball.x, self.ball.y, 5.0, 2.0 * std::f32::consts::PI, 0.0, 0);
-        drawing::set_fill_style(self.ctx, "#FF0000");
-        drawing::fill(self.ctx);
+        canvas::begin_path(self.ctx);
+        canvas::arc(self.ctx, self.ball.x, self.ball.y, 5.0, 2.0 * std::f32::consts::PI, 0.0, false);
+        canvas::set_fill_style(self.ctx, "#FF0000");
+        canvas::fill(self.ctx, NULL);
     }
 
     fn ball_update(&mut self) {
