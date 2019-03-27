@@ -175,7 +175,7 @@ impl GameState {
 
     fn ball_render(&self) {
         canvas::begin_path(self.ctx);
-        canvas::arc(self.ctx, self.ball.x, self.ball.y, 5.0, 2.0 * std::f32::consts::PI, 0.0, false);
+        canvas::arc(self.ctx, self.ball.x, self.ball.y, 5.0, 2.0 * std::f32::consts::PI, 0.0);
         canvas::set_fill_style(self.ctx, "#FF0000");
         canvas::fill(self.ctx);
     }
